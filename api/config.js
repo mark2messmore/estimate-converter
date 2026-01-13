@@ -1,4 +1,11 @@
-import { kv } from '@vercel/kv';
+// Try to use Vercel KV if available, otherwise fall back to in-memory
+let kv = null;
+try {
+  const kvModule = await import('@vercel/kv');
+  kv = kvModule.kv;
+} catch (e) {
+  console.log('Vercel KV not available, using in-memory storage');
+}
 
 const CONFIG_KEY = 'model_config';
 
@@ -7,6 +14,9 @@ const DEFAULT_CONFIG = {
   provider: 'anthropic',
   model: 'claude-sonnet-4-20250514'
 };
+
+// In-memory fallback
+let memoryConfig = { ...DEFAULT_CONFIG };
 
 // Available providers and their models
 export const PROVIDERS = {
@@ -41,13 +51,17 @@ export const PROVIDERS = {
 };
 
 export async function getConfig() {
-  try {
-    const config = await kv.get(CONFIG_KEY);
-    return config || DEFAULT_CONFIG;
-  } catch (error) {
-    console.error('KV read error:', error);
-    return DEFAULT_CONFIG;
+  // Try KV first
+  if (kv) {
+    try {
+      const config = await kv.get(CONFIG_KEY);
+      if (config) return config;
+    } catch (error) {
+      console.error('KV read error:', error);
+    }
   }
+  // Fall back to memory
+  return memoryConfig;
 }
 
 export async function setConfig(provider, model) {
@@ -60,7 +74,18 @@ export async function setConfig(provider, model) {
   }
 
   const config = { provider, model };
-  await kv.set(CONFIG_KEY, config);
+
+  // Try to save to KV
+  if (kv) {
+    try {
+      await kv.set(CONFIG_KEY, config);
+    } catch (error) {
+      console.error('KV write error:', error);
+    }
+  }
+
+  // Always update memory
+  memoryConfig = config;
   return config;
 }
 
@@ -78,7 +103,8 @@ export default async function handler(req, res) {
     const current = await getConfig();
     return res.status(200).json({
       current,
-      providers: PROVIDERS
+      providers: PROVIDERS,
+      storage: kv ? 'kv' : 'memory'
     });
   }
 
@@ -87,7 +113,7 @@ export default async function handler(req, res) {
     const adminPassword = process.env.ADMIN_PASSWORD;
 
     if (!adminPassword) {
-      return res.status(500).json({ error: 'Admin password not configured' });
+      return res.status(500).json({ error: 'Admin password not configured. Set ADMIN_PASSWORD env var.' });
     }
 
     const { password, provider, model } = req.body;
