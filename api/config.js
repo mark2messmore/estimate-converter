@@ -24,6 +24,7 @@ export const PROVIDERS = {
   google: {
     name: 'Google',
     models: [
+      { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (Preview)' },
       { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash' },
       { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
       { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' }
