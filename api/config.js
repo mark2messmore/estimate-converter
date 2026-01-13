@@ -1,12 +1,3 @@
-// Try to use Vercel KV if available, otherwise fall back to in-memory
-let kv = null;
-try {
-  const kvModule = await import('@vercel/kv');
-  kv = kvModule.kv;
-} catch (e) {
-  console.log('Vercel KV not available, using in-memory storage');
-}
-
 const CONFIG_KEY = 'model_config';
 
 // Default config
@@ -50,8 +41,29 @@ export const PROVIDERS = {
   }
 };
 
+// Lazy-load KV
+let kvInstance = null;
+let kvLoaded = false;
+
+async function getKV() {
+  if (kvLoaded) return kvInstance;
+  kvLoaded = true;
+
+  try {
+    // Only try KV if env vars are set
+    if (process.env.KV_REST_API_URL) {
+      const { kv } = await import('@vercel/kv');
+      kvInstance = kv;
+    }
+  } catch (e) {
+    console.log('KV not available:', e.message);
+  }
+  return kvInstance;
+}
+
 export async function getConfig() {
-  // Try KV first
+  const kv = await getKV();
+
   if (kv) {
     try {
       const config = await kv.get(CONFIG_KEY);
@@ -60,7 +72,6 @@ export async function getConfig() {
       console.error('KV read error:', error);
     }
   }
-  // Fall back to memory
   return memoryConfig;
 }
 
@@ -74,8 +85,8 @@ export async function setConfig(provider, model) {
   }
 
   const config = { provider, model };
+  const kv = await getKV();
 
-  // Try to save to KV
   if (kv) {
     try {
       await kv.set(CONFIG_KEY, config);
@@ -84,7 +95,6 @@ export async function setConfig(provider, model) {
     }
   }
 
-  // Always update memory
   memoryConfig = config;
   return config;
 }
@@ -98,9 +108,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // GET - return current config and available providers
   if (req.method === 'GET') {
     const current = await getConfig();
+    const kv = await getKV();
     return res.status(200).json({
       current,
       providers: PROVIDERS,
@@ -108,12 +118,11 @@ export default async function handler(req, res) {
     });
   }
 
-  // POST - update config (requires admin password)
   if (req.method === 'POST') {
     const adminPassword = process.env.ADMIN_PASSWORD;
 
     if (!adminPassword) {
-      return res.status(500).json({ error: 'Admin password not configured. Set ADMIN_PASSWORD env var.' });
+      return res.status(500).json({ error: 'Admin password not configured. Set ADMIN_PASSWORD env var in Vercel.' });
     }
 
     const { password, provider, model } = req.body;
