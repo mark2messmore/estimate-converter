@@ -74,6 +74,9 @@
     const { useState, useCallback } = React;
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X } = lucide;
 
+    // App version - update this when releasing new versions
+    const APP_VERSION = '1.0.4';
+
     function EstimateConverter() {
       const [file, setFile] = useState(null);
       const [filePreview, setFilePreview] = useState(null);
@@ -82,6 +85,7 @@
       const [data, setData] = useState(null);
       const [copied, setCopied] = useState(false);
       const [error, setError] = useState(null);
+      const [lastApiResponse, setLastApiResponse] = useState(null);
 
       // API endpoint pointing to your Vercel proxy
       // This URL stays consistent across deployments
@@ -182,9 +186,10 @@ Return ONLY the JSON array, no other text. Example format:
           });
 
           const result = await response.json();
+          setLastApiResponse(result);
 
           if (result.error) {
-            setError('API Error: ' + (result.error.message || 'Unknown error'));
+            setError('API Error: ' + (result.error.message || result.error || 'Unknown error'));
             return;
           }
 
@@ -196,7 +201,7 @@ Return ONLY the JSON array, no other text. Example format:
             setData(parsed);
           } else {
             console.log('API Response:', text);
-            setError('Could not parse the response. Please try again. (Check console for details)');
+            setError('Could not parse the response. Click "Export Error Log" for details.');
           }
         } catch (err) {
           setError('Error processing file: ' + err.message);
@@ -223,6 +228,34 @@ Return ONLY the JSON array, no other text. Example format:
         setFileName('');
         setData(null);
         setError(null);
+        setLastApiResponse(null);
+      };
+
+      const exportErrorLog = () => {
+        const timestamp = new Date().toISOString();
+        const logContent = `Estimate Converter Error Log
+=============================
+Timestamp: ${timestamp}
+App Version: ${APP_VERSION}
+File Name: ${fileName}
+File Type: ${file?.type || 'unknown'}
+
+Error Message:
+${error || 'No error message'}
+
+API Response:
+${JSON.stringify(lastApiResponse, null, 2)}
+`;
+
+        const blob = new Blob([logContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `error-log-${timestamp.replace(/[:.]/g, '-')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       };
 
       return (
@@ -300,15 +333,26 @@ Return ONLY the JSON array, no other text. Example format:
                 )}
 
                 {error && (
-                  <div className="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-lg flex justify-between items-center">
-                    <span>{error}</span>
-                    <button
-                      onClick={clearAll}
-                      className="flex items-center gap-2 px-3 py-1 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors ml-4"
-                    >
-                      <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
-                      Start Over
-                    </button>
+                  <div className="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span>{error}</span>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={exportErrorLog}
+                          className="flex items-center gap-2 px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        >
+                          <lucide-icon name="download" className="w-4 h-4"></lucide-icon>
+                          Export Error Log
+                        </button>
+                        <button
+                          onClick={clearAll}
+                          className="flex items-center gap-2 px-3 py-1 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                        >
+                          <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
+                          Start Over
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -377,6 +421,9 @@ Return ONLY the JSON array, no other text. Example format:
 
             <p className="text-center text-xs text-slate-500 mt-8">
               Tip: You can paste images directly with Ctrl+V (or Cmd+V on Mac)
+            </p>
+            <p className="text-center text-xs text-slate-600 mt-2">
+              v{APP_VERSION}
             </p>
           </div>
         </div>
