@@ -1,11 +1,11 @@
 {
-  "version": "1.0.7",
-  "notes": "Fixed auto-updater: now properly checks for available updates using Tauri native dialogs",
-  "pub_date": "2026-01-14T20:10:00Z",
+  "version": "1.0.8",
+  "notes": "Added withGlobalTauri for reliable window.__TAURI__ access, renamed app title",
+  "pub_date": "2026-01-14T20:30:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3duQzNhbkpxVmZxM1hxTndObWtUYWV4OFpKV1lHRHcrZkxDNGgrOFN5Tk4xaEVma01DZ25MbkE2bEx1VkxiWE5hdHNhaEFZQjIvQ0EyL1ZYVjlHZGdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDE4OTg4CWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMC43X3g2NC1zZXR1cC5leGUKRGFMU2ZKVU1yRXJJbUx1Vmd1YVEwM2dkeTVPVEw2bW5nVy9yQkg0emd5NUNiUEJhZUN1VTJwczRHWDc0T1RMRGIyYk4xS2lXMG9SQ2NZMXprWEdOQVE9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.0.7/Estimate.Converter_1.0.7_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5Uzd3T1dMMkUwaHgwK29HYnVpZ1BrMTIxM0p0NWJKSWh4eStHbEFJUWpYa0RmN3gxWGVlNGJvN1UxYk82WnQyV3FMaFc1cnBMNS9yb01PcVpmNFowTkFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDIwMjE1CWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMC44X3g2NC1zZXR1cC5leGUKK0hGeWc2bXZJbXNpTkhrYjRLUVp2dWcrZC82d1NWV0RRemdsMjRqZThjRU1NRmVBOWhGMjhJOFlQNHViUWg2OWdxUTRqSUNoS2ZLclVKdGNDa3l4Q0E9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.0.8/Estimate.Converter_1.0.8_x64-setup.exe"
     }
   }
 }

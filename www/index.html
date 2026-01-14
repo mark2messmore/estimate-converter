@@ -141,7 +141,7 @@
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X } = lucide;
 
     // App version - update this when releasing new versions
-    const APP_VERSION = '1.0.7';
+    const APP_VERSION = '1.0.8';
 
     function EstimateConverter() {
       const [file, setFile] = useState(null);
@@ -493,14 +493,12 @@ ${JSON.stringify(lastApiResponse, null, 2)}
             </p>
             <div className="flex items-center justify-center gap-4 mt-2">
               <span className="text-xs text-slate-600">v{APP_VERSION}</span>
-              {window.__TAURI__ && (
-                <button
-                  onClick={() => window.checkForUpdates(false)}
-                  className="text-xs text-slate-500 hover:text-primary transition-colors underline"
-                >
-                  Check for Updates
-                </button>
-              )}
+              <button
+                onClick={() => window.checkForUpdates(false)}
+                className="text-xs text-slate-500 hover:text-primary transition-colors underline"
+              >
+                Check for Updates
+              </button>
             </div>
           </div>
         </div>

@@ -1,12 +1,13 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Estimate Converter",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "identifier": "com.estimateconverter.desktop",
   "build": {
     "frontendDist": "../www"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Estimate Converter",
