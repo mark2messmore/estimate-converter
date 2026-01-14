@@ -142,7 +142,7 @@
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X, Info, ChevronDown } = lucide;
 
     // App version - update this when releasing new versions
-    const APP_VERSION = '1.1.1';
+    const APP_VERSION = '1.1.2';
 
     function EstimateConverter() {
       const [file, setFile] = useState(null);
@@ -325,19 +325,19 @@ ${JSON.stringify(lastApiResponse, null, 2)}
         >
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-6">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <lucide-icon name="file-spreadsheet" className="w-8 h-8 text-primary"></lucide-icon>
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <img src="dukane-logo.png" alt="Dukane" className="h-8" />
                 <h1 className="text-2xl font-bold text-white">Purchase Requisition Helper</h1>
               </div>
 
-              <details className="inline-block bg-slate-800 rounded-lg border border-slate-700 open:border-primary/50 transition-all">
+              <details className="bg-slate-800 rounded-lg border border-slate-700 open:border-primary/50 transition-all max-w-4xl">
                 <summary className="px-4 py-2 cursor-pointer text-slate-300 font-medium hover:text-white flex items-center gap-2 select-none">
                   <lucide-icon name="info" className="w-4 h-4"></lucide-icon>
                   How to Use this App?
                   <lucide-icon name="chevron-down" className="w-4 h-4 ml-1 opacity-50"></lucide-icon>
                 </summary>
                 <div className="px-4 pb-4 pt-2 text-left text-sm text-slate-400 border-t border-slate-700 mt-1">
-                  <ul className="space-y-2">
+                  <ul className="space-y-4">
                     <li className="flex gap-2">
                       <span className="font-bold text-white whitespace-nowrap">Step 1:</span>
                       <span>Upload your Quote/Estimate file (PDF or Image)</span>
@@ -350,9 +350,32 @@ ${JSON.stringify(lastApiResponse, null, 2)}
                       <span className="font-bold text-white whitespace-nowrap">Step 3:</span>
                       <span>Verify data and click &quot;Copy Data&quot;</span>
                     </li>
-                    <li className="flex gap-2">
-                      <span className="font-bold text-white whitespace-nowrap">Step 4:</span>
-                      <span>Go to your Req Form → Click Home → Paste arrow down → Select &quot;Paste Append&quot;</span>
+                    <li>
+                      <div className="flex gap-2">
+                        <span className="font-bold text-white whitespace-nowrap">Step 4:</span>
+                        <span>Open Purchase Requisition form</span>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="flex gap-2 mb-2">
+                        <span className="font-bold text-white whitespace-nowrap">Step 5:</span>
+                        <span>Click inside the first &quot;Ln #&quot; field so your cursor is blinking there</span>
+                      </div>
+                      <img src="select-first-ln.png" alt="Select first Ln # field" className="rounded border border-slate-600 max-w-full" style={{maxHeight: '200px'}} />
+                    </li>
+                    <li>
+                      <div className="flex gap-2 mb-2">
+                        <span className="font-bold text-white whitespace-nowrap">Step 6:</span>
+                        <span>Click Home tab, then click the dropdown arrow under &quot;Paste&quot;, then select &quot;Paste Append&quot;</span>
+                      </div>
+                      <img src="paste-dropdown.png" alt="Paste dropdown in Home tab" className="rounded border border-slate-600 max-w-full" style={{maxHeight: '180px'}} />
+                    </li>
+                    <li>
+                      <div className="flex gap-2 mb-2">
+                        <span className="font-bold text-white whitespace-nowrap">Step 7:</span>
+                        <span>If you see this warning, click &quot;Yes&quot;</span>
+                      </div>
+                      <img src="warning-click-yes.png" alt="Click Yes on warning dialog" className="rounded border border-slate-600 max-w-full" style={{maxHeight: '120px'}} />
                     </li>
                   </ul>
                 </div>
@@ -485,7 +508,7 @@ ${JSON.stringify(lastApiResponse, null, 2)}
                     </div>
                     {copied && (
                       <div className="bg-emerald-900/30 border-b border-emerald-900/50 p-3 text-center text-emerald-200 text-sm">
-                        Step 4: Go to purchase requisition form → Click Home → Paste arrow down → Select &quot;Paste Append&quot;
+                        Now: Open Purchase Req → Click first Ln # field → Home → Paste dropdown → Paste Append
                       </div>
                     )}
                     <div className="overflow-x-auto">

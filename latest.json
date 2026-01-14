@@ -1,11 +1,11 @@
 {
-  "version": "1.1.1",
-  "notes": "Step 4 instructions now stay visible until Start Over is clicked",
-  "pub_date": "2026-01-14T22:45:00Z",
+  "version": "1.1.2",
+  "notes": "Added detailed How to Use instructions with screenshots, Dukane branding",
+  "pub_date": "2026-01-14T23:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzZwL0ZuTVZsUVc4TjJEVVJlZ3ZEZytqWWJIc1J5R2dqTExGd3kwZlZsbTZoL1Z5dG1lOWt1Nnh2amY5cCt5MW5WZUFwWlNEKzViRnVkUnZYU0F2OWdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDI5MDYyCWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMS4xX3g2NC1zZXR1cC5leGUKd3hVQldtblc1K0RYbEs1RCsvS3pPcDVCTGJyNjRjWmdESlVYdENkRmtqVVJ5VldqcHF1OGVqai9PZGI3U3NXb2RUeGpzMldXaVB1NU9pVTNNYUNBQkE9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.1/Estimate.Converter_1.1.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3hJdk52bUVYWHVBdTk5OEVnUzZWcXVsUVY1amc1VjFaeWNjMG5Mem5Nd1grbkNoUG81ZVVBaDVIYnh3MnFpbFhzVXFPY013MFcvUkJCNUppOFRmQmdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDMxNTI5CWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMS4yX3g2NC1zZXR1cC5leGUKQThsTDVVNXNCaEdPK09pbnJMZDlqTkV0R3hmeG9tUDlzYm5ERGhLSHdOV3dDTkg1QzV6U3p5TS9Dak9pVnBVWXk4WVJjOHd1aHpRUGFySU5tTEtRQ0E9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.2/Estimate.Converter_1.1.2_x64-setup.exe"
     }
   }
 }
