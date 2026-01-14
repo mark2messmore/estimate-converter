@@ -142,7 +142,7 @@
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X, Info, ChevronDown } = lucide;
 
     // App version - update this when releasing new versions
-    const APP_VERSION = '1.1.0';
+    const APP_VERSION = '1.1.1';
 
     function EstimateConverter() {
       const [file, setFile] = useState(null);
@@ -286,7 +286,6 @@ Return ONLY the JSON array, no other text. Example format:
 
         navigator.clipboard.writeText(rows);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
       };
 
       const clearAll = () => {
@@ -296,6 +295,7 @@ Return ONLY the JSON array, no other text. Example format:
         setData(null);
         setError(null);
         setLastApiResponse(null);
+        setCopied(false);
       };
 
       const exportErrorLog = async () => {
