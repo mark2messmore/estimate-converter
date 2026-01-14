@@ -1,11 +1,11 @@
 {
-  "version": "1.1.4",
-  "notes": "App renamed to 'Purchase Requisition Helper' and updated desktop icon to use Dukane logo",
-  "pub_date": "2026-01-14T23:20:26Z",
+  "version": "1.1.5",
+  "notes": "Updated desktop and taskbar icon to clean yellow D on transparent background",
+  "pub_date": "2026-01-14T23:33:23Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3grMFZCVWg4ZjlMK0V0cU05YmlQeVlOMVd4V3phdE1qTUdYN0VOakxhTEpZUDhHNW9rbmZYSWh2NG9JK2lDNjlBd3QrY0htZjJralB5ckxld1Y3Znc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDMyODI2CWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS40X3g2NC1zZXR1cC5leGUKTnVSQktKSHFxRWIzYy9PRnA0VE5pbC93ZFlEOE1uTVRWNE53ZW5WTjdSTUNMYjA0N1o5RTROaEFGd0RRbERmTi9jNWN6ZnQ2YlcyYzNkZzRaT3pqQkE9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.4/Purchase.Requisition.Helper_1.1.4_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3lDTUJZdUlHOWNoaGNLNmV5RHZnSVdDN3JGSVVpcHNySk5lWlhpWnY5OWN5VHUwL3JpdFlJYjBTbGV2aC9zcWEzMTVoQkFLQmhxWlFVcHowK0tZOFE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDMzNjAzCWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS41X3g2NC1zZXR1cC5leGUKU1U3bk9GYTdNbS9GQy9rckdKaGFDQ2wwS2VuMjJJR3VXVWxhd2ZZR2EwSXZ5eXRoenVNcloveGYyNkdzZGRSQ2hvSGlyN2ROVWFnQVNjOU9vYjlwQ3c9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.5/Purchase.Requisition.Helper_1.1.5_x64-setup.exe"
     }
   }
 }
