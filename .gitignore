@@ -17,3 +17,9 @@ RELEASE-GUIDE.md
 
 # Temp files
 tmpclaude-*
+
+# Release installers (uploaded to GitHub releases, not repo)
+*.exe
+
+# Old folders (not needed)
+public/
