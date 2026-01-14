@@ -1,11 +1,11 @@
 {
-  "version": "1.0.9",
-  "notes": "Test release for Check for Updates button",
-  "pub_date": "2026-01-14T20:48:00Z",
+  "version": "1.1.0",
+  "notes": "UI improvements: renamed to Purchase Requisition Helper, added step-by-step instructions, improved workflow guidance",
+  "pub_date": "2026-01-14T21:16:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzUzK1NMTDhqUFJaWFVtbTZIUGFMSG9INkE2ZG52NHJmekRmb0FmMmMrYmRGVVVVTWNkNk0xWmI2UmlQLzBQR0V6UDExeTVwcDdjNSt2VFk2UGw4c3dvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDIxMzAxCWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMC45X3g2NC1zZXR1cC5leGUKNzV1QW1xNW5kVEhWVFlkZUlHcWVQNjlKNTJUWmZjR2pLdzc3enl1K2E2ak1LM3RUN2xQb05mU2laeHhpYUlob01RTUlUOURXd2lHNDZmN3lHNjZwRGc9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.0.9/Estimate.Converter_1.0.9_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3pCckMvNGpybDJBSmlnU0l4RjBoRHYvRWx4TmRwRjBkanRtRklqcld5WmJzWEI3Y0UyYWFuSW0vVE5MKzdSNFZ4Qjd0ZGJpWm4wZlNBTm9Tb1dvMWdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDIyOTY3CWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMS4wX3g2NC1zZXR1cC5leGUKOWdtYjgvUnlBalNHb0dadmJZWmJybkNlNmpvZS9aTlY5Q1lYSVFKUjQ3MGtNR252T1pVUnJ1QWVFRXdoZmZtSUwxYmE4MFFWbldsckFwZTFmSnJYQVE9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.0/Estimate.Converter_1.1.0_x64-setup.exe"
     }
   }
 }

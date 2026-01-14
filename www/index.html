@@ -138,11 +138,11 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useCallback } = React;
-    const { Upload, Copy, Check, Loader2, FileSpreadsheet, X } = lucide;
+    const { useState, useCallback, useEffect } = React;
+    const { Upload, Copy, Check, Loader2, FileSpreadsheet, X, Info, ChevronDown } = lucide;
 
     // App version - update this when releasing new versions
-    const APP_VERSION = '1.0.9';
+    const APP_VERSION = '1.1.0';
 
     function EstimateConverter() {
       const [file, setFile] = useState(null);
@@ -324,12 +324,39 @@ ${JSON.stringify(lastApiResponse, null, 2)}
           onPaste={handlePaste}
         >
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="text-center mb-6">
+              <div className="flex items-center justify-center gap-3 mb-4">
                 <lucide-icon name="file-spreadsheet" className="w-8 h-8 text-primary"></lucide-icon>
-                <h1 className="text-2xl font-bold text-white">Estimate → Excel Converter</h1>
+                <h1 className="text-2xl font-bold text-white">Purchase Requisition Helper</h1>
               </div>
-              <p className="text-slate-400">Upload a PDF or image, extract data, copy to Excel</p>
+
+              <details className="inline-block bg-slate-800 rounded-lg border border-slate-700 open:border-primary/50 transition-all">
+                <summary className="px-4 py-2 cursor-pointer text-slate-300 font-medium hover:text-white flex items-center gap-2 select-none">
+                  <lucide-icon name="info" className="w-4 h-4"></lucide-icon>
+                  How to Use this App?
+                  <lucide-icon name="chevron-down" className="w-4 h-4 ml-1 opacity-50"></lucide-icon>
+                </summary>
+                <div className="px-4 pb-4 pt-2 text-left text-sm text-slate-400 border-t border-slate-700 mt-1">
+                  <ul className="space-y-2">
+                    <li className="flex gap-2">
+                      <span className="font-bold text-white whitespace-nowrap">Step 1:</span>
+                      <span>Upload your Quote/Estimate file (PDF or Image)</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="font-bold text-white whitespace-nowrap">Step 2:</span>
+                      <span>Review the preview and click &quot;Run Extractor&quot;</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="font-bold text-white whitespace-nowrap">Step 3:</span>
+                      <span>Verify data and click &quot;Copy Data&quot;</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="font-bold text-white whitespace-nowrap">Step 4:</span>
+                      <span>Go to your Req Form → Click Home → Paste arrow down → Select &quot;Paste Append&quot;</span>
+                    </li>
+                  </ul>
+                </div>
+              </details>
             </div>
 
             {!file ? (
@@ -340,7 +367,7 @@ ${JSON.stringify(lastApiResponse, null, 2)}
                 onClick={() => document.getElementById('fileInput').click()}
               >
                 <lucide-icon name="upload" className="w-12 h-12 text-slate-500 mx-auto mb-4"></lucide-icon>
-                <p className="text-lg text-slate-300 mb-2">Drop file here, click to upload, or paste image (Ctrl+V)</p>
+                <p className="text-lg text-slate-300 mb-2">Step 1: Drop quote/estimate here, click to upload, or paste image (Ctrl+V)</p>
                 <p className="text-sm text-slate-500">Supports PDF, PNG, JPG, WEBP</p>
                 <input
                   id="fileInput"
@@ -385,10 +412,10 @@ ${JSON.stringify(lastApiResponse, null, 2)}
                       {loading ? (
                         <>
                           <lucide-icon name="loader-2" className="w-5 h-5 animate-spin"></lucide-icon>
-                          Extracting data...
+                          Step 2: Extracting data...
                         </>
                       ) : (
-                        'Extract Data'
+                        'Step 2: Run Extractor'
                       )}
                     </button>
                     <button
@@ -397,7 +424,7 @@ ${JSON.stringify(lastApiResponse, null, 2)}
                       className="px-4 py-3 bg-slate-600 text-white rounded-lg font-medium hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                     >
                       <lucide-icon name="rotate-ccw" className="w-5 h-5"></lucide-icon>
-                      Start Over
+                      Reset
                     </button>
                   </div>
                 )}
@@ -438,12 +465,12 @@ ${JSON.stringify(lastApiResponse, null, 2)}
                           {copied ? (
                             <>
                               <lucide-icon name="check" className="w-4 h-4"></lucide-icon>
-                              Copied!
+                              Copied! (Step 3 Complete)
                             </>
                           ) : (
                             <>
                               <lucide-icon name="copy" className="w-4 h-4"></lucide-icon>
-                              Copy for Excel
+                              Step 3: Copy Data
                             </>
                           )}
                         </button>
@@ -456,6 +483,11 @@ ${JSON.stringify(lastApiResponse, null, 2)}
                         </button>
                       </div>
                     </div>
+                    {copied && (
+                      <div className="bg-emerald-900/30 border-b border-emerald-900/50 p-3 text-center text-emerald-200 text-sm">
+                        Step 4: Go to purchase requisition form → Click Home → Paste arrow down → Select &quot;Paste Append&quot;
+                      </div>
+                    )}
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead className="bg-slate-700">

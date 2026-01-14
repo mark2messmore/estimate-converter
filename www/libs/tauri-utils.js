@@ -16,7 +16,23 @@ export const updater = {
             // 'plugin:updater|check' returns the update metadata + rid
             const result = await tauri.core.invoke('plugin:updater|check');
             
+            // DEBUG: Show what we found
+            if (result) {
+                // Try to get local version if possible, otherwise just show result
+                // alert(`Debug: Found version ${result.version} online. Available? ${result.available}`);
+                console.log(`Debug: Found version ${result.version} online. Available? ${result.available}`);
+            } else {
+                // alert("Debug: No update information returned from server (result is null)");
+                console.log("Debug: No update information returned from server (result is null)");
+            }
+
             console.log("Update check raw result:", result);
+
+            // Fix for "undefined" available property in some plugin versions
+            // If we got a result and a version, it implies an update IS available
+            if (result && result.version && (result.available === undefined || result.available === null)) {
+                result.available = true;
+            }
 
             if (!result || !result.available) {
                 return { available: false };
