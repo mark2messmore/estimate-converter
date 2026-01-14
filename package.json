@@ -1,0 +1,21 @@
+{
+  "name": "estimate-converter",
+  "version": "1.0.0",
+  "description": "Estimate to Excel Converter - Desktop App",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "keywords": [
+    "estimate",
+    "excel",
+    "converter"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.9.6",
+    "pngjs": "^7.0.0"
+  }
+}
