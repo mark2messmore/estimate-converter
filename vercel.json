@@ -1,10 +1,5 @@
 {
   "buildCommand": "",
   "installCommand": "npm install @vercel/kv",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/$1"
-    }
-  ]
+  "outputDirectory": "www"
 }
