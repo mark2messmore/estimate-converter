@@ -9,6 +9,84 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    // Auto-updater for Tauri using the proper plugin API
+    async function checkForUpdates() {
+      if (!window.__TAURI__) return;
+
+      try {
+        // Import the updater plugin from Tauri's plugin system
+        const { check } = await import('https://unpkg.com/@tauri-apps/plugin-updater@2/dist/index.min.js');
+        const { relaunch } = await import('https://unpkg.com/@tauri-apps/plugin-process@2/dist/index.min.js');
+
+        console.log('Checking for updates...');
+        const update = await check();
+        console.log('Update check result:', update);
+
+        if (update) {
+          const confirmed = confirm(
+            `Update ${update.version} is available!\n\n` +
+            `Release notes: ${update.body || 'No notes'}\n\n` +
+            `Would you like to download and install it now?`
+          );
+
+          if (confirmed) {
+            console.log('Downloading and installing update...');
+            await update.downloadAndInstall();
+            console.log('Update installed, relaunching...');
+            await relaunch();
+          }
+        } else {
+          console.log('No update available');
+        }
+      } catch (e) {
+        console.log('Update check error:', e);
+      }
+    }
+
+    // Check after a short delay to ensure Tauri is ready
+    setTimeout(checkForUpdates, 2000);
+
+    // Export save function for use by React component
+    window.saveFileWithTauri = async function(filename, content) {
+      if (!window.__TAURI__) {
+        // Fallback for browser - use traditional download
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return true;
+      }
+
+      try {
+        // Use Tauri's dialog and fs plugins
+        const { save } = await import('https://unpkg.com/@tauri-apps/plugin-dialog@2/dist/index.min.js');
+        const { writeTextFile } = await import('https://unpkg.com/@tauri-apps/plugin-fs@2/dist/index.min.js');
+
+        // Show save dialog
+        const filePath = await save({
+          defaultPath: filename,
+          filters: [{ name: 'Text Files', extensions: ['txt'] }]
+        });
+
+        if (filePath) {
+          await writeTextFile(filePath, content);
+          return true;
+        }
+        return false;
+      } catch (e) {
+        console.error('Save file error:', e);
+        // Fallback to alert with content
+        alert('Could not save file. Error log:\n\n' + content.substring(0, 500) + '...');
+        return false;
+      }
+    };
+  </script>
   <style>
     body {
       margin: 0;
@@ -39,6 +117,9 @@
     const { useState, useCallback } = React;
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X } = lucide;
 
+    // App version - update this when releasing new versions
+    const APP_VERSION = '1.0.5';
+
     function EstimateConverter() {
       const [file, setFile] = useState(null);
       const [filePreview, setFilePreview] = useState(null);
@@ -47,9 +128,11 @@
       const [data, setData] = useState(null);
       const [copied, setCopied] = useState(false);
       const [error, setError] = useState(null);
+      const [lastApiResponse, setLastApiResponse] = useState(null);
 
       // API endpoint pointing to your Vercel proxy
-      const API_ENDPOINT = 'https://estimate-to-excel-for-purchase-8mt9wsyy8.vercel.app/api/extract';
+      // This URL stays consistent across deployments
+      const API_ENDPOINT = 'https://estimate-to-excel-for-purchase-req.vercel.app/api/extract';
 
       const processFile = (f) => {
         const reader = new FileReader();
@@ -146,9 +229,10 @@ Return ONLY the JSON array, no other text. Example format:
           });
 
           const result = await response.json();
+          setLastApiResponse(result);
 
           if (result.error) {
-            setError('API Error: ' + (result.error.message || 'Unknown error'));
+            setError('API Error: ' + (result.error.message || result.error || 'Unknown error'));
             return;
           }
 
@@ -159,7 +243,8 @@ Return ONLY the JSON array, no other text. Example format:
             const parsed = JSON.parse(jsonMatch[0]);
             setData(parsed);
           } else {
-            setError('Could not parse the response. Please try again.');
+            console.log('API Response:', text);
+            setError('Could not parse the response. Click "Export Error Log" for details.');
           }
         } catch (err) {
           setError('Error processing file: ' + err.message);
@@ -186,6 +271,27 @@ Return ONLY the JSON array, no other text. Example format:
         setFileName('');
         setData(null);
         setError(null);
+        setLastApiResponse(null);
+      };
+
+      const exportErrorLog = async () => {
+        const timestamp = new Date().toISOString();
+        const logContent = `Estimate Converter Error Log
+=============================
+Timestamp: ${timestamp}
+App Version: ${APP_VERSION}
+File Name: ${fileName}
+File Type: ${file?.type || 'unknown'}
+
+Error Message:
+${error || 'No error message'}
+
+API Response:
+${JSON.stringify(lastApiResponse, null, 2)}
+`;
+
+        const filename = `error-log-${timestamp.replace(/[:.]/g, '-')}.txt`;
+        await window.saveFileWithTauri(filename, logContent);
       };
 
       return (
@@ -264,7 +370,25 @@ Return ONLY the JSON array, no other text. Example format:
 
                 {error && (
                   <div className="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-lg">
-                    {error}
+                    <div className="flex justify-between items-center">
+                      <span>{error}</span>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={exportErrorLog}
+                          className="flex items-center gap-2 px-3 py-1 bg-red-700 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        >
+                          <lucide-icon name="download" className="w-4 h-4"></lucide-icon>
+                          Export Error Log
+                        </button>
+                        <button
+                          onClick={clearAll}
+                          className="flex items-center gap-2 px-3 py-1 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                        >
+                          <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
+                          Start Over
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -272,22 +396,31 @@ Return ONLY the JSON array, no other text. Example format:
                   <div className="bg-slate-800 rounded-xl shadow-lg border border-slate-700 overflow-hidden">
                     <div className="flex justify-between items-center p-4 border-b border-slate-700">
                       <span className="font-medium text-slate-200">Extracted Data ({data.length} rows)</span>
-                      <button
-                        onClick={copyToClipboard}
-                        className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors shadow-lg shadow-accent/20"
-                      >
-                        {copied ? (
-                          <>
-                            <lucide-icon name="check" className="w-4 h-4"></lucide-icon>
-                            Copied!
-                          </>
-                        ) : (
-                          <>
-                            <lucide-icon name="copy" className="w-4 h-4"></lucide-icon>
-                            Copy for Excel
-                          </>
-                        )}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={copyToClipboard}
+                          className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors shadow-lg shadow-accent/20"
+                        >
+                          {copied ? (
+                            <>
+                              <lucide-icon name="check" className="w-4 h-4"></lucide-icon>
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <lucide-icon name="copy" className="w-4 h-4"></lucide-icon>
+                              Copy for Excel
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={clearAll}
+                          className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                        >
+                          <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
+                          Start Over
+                        </button>
+                      </div>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
@@ -324,6 +457,9 @@ Return ONLY the JSON array, no other text. Example format:
 
             <p className="text-center text-xs text-slate-500 mt-8">
               Tip: You can paste images directly with Ctrl+V (or Cmd+V on Mac)
+            </p>
+            <p className="text-center text-xs text-slate-600 mt-2">
+              v{APP_VERSION}
             </p>
           </div>
         </div>
