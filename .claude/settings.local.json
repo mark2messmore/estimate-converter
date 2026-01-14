@@ -20,7 +20,8 @@
       "Bash(export TAURI_SIGNING_PRIVATE_KEY:*)",
       "Bash(gh repo create:*)",
       "Bash(gh release create v1.0.7 --title \"v1.0.7\" --notes \"$\\(cat <<''EOF''\n## Fixed Auto-Updater\n\n- **Key fix**: Now properly checks `update.available` property \\(plugin v2.9.0 bug workaround\\)\n- Uses Tauri''s native `ask\\(\\)` dialog instead of browser `confirm\\(\\)`\n- Added explicit permissions for updater, dialog, and process plugins\n- Added \"Check for Updates\" link at bottom of app\n\nIf you have v1.0.5 or v1.0.6 installed, the update dialog should now appear automatically on app launch!\nEOF\n\\)\" \"Estimate.Converter_1.0.7_x64-setup.exe\" \"latest.json\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(gh repo view:*)"
     ]
   }
 }
