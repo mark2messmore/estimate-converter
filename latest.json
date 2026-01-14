@@ -1,0 +1,11 @@
+{
+  "version": "1.0.3",
+  "notes": "Added Start Over button to errors, improved error handling, default to Claude Sonnet 4",
+  "pub_date": "2026-01-14T17:30:00Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzR5NlZFWjVIclRTVzJ2RmxXTUdSMzJUUHVRZTRKTktwbDlORzJvL1JSMCtBRnpQTkFRblA5d0ozS0IvQng5eS8rOERlaEFSQWZSUVBLOVN4aGFxMFFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDExMDQ1CWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMC4zX3g2NC1zZXR1cC5leGUKaGI3cTk4a2xFbTluQWk5cUM0WHJ5cHoyVXBmQjkwdkJDN2Nsc2lVRFpJckZjTFlnVEc5T0E4U05WUmV3ekFxUUdyQzNzaUpEd1BTaHZSYTVOOEliQnc9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.0.3/Estimate.Converter_1.0.3_x64-setup.exe"
+    }
+  }
+}

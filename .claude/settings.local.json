@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vercel --prod:*)",
+      "Bash(npm install:*)",
+      "Bash(echo:*)",
+      "Bash(npx tauri init)",
+      "Bash(copy \"c:\\\\MyProjects\\\\estimate-to-excel-tauri\\\\build\\\\icon.ico\" \"c:\\\\MyProjects\\\\estimate-to-excel-tauri\\\\src-tauri\\\\icons\\\\icon.ico\")",
+      "Bash(copy \"c:\\\\MyProjects\\\\estimate-to-excel-tauri\\\\build\\\\icon.png\" \"c:\\\\MyProjects\\\\estimate-to-excel-tauri\\\\src-tauri\\\\icons\\\\128x128.png\")",
+      "Bash(copy:*)",
+      "Bash(npm run build:*)",
+      "Bash(rustup default:*)",
+      "Bash(node -e:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(vercel:*)",
+      "Bash(TAURI_SIGNING_PRIVATE_KEY_PASSWORD=\"\" npx tauri signer:*)",
+      "Bash(TAURI_SIGNING_PRIVATE_KEY=\"dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5SUdmSmhmZDVCVFJ4NVhEYjBKYnFLNFA4VDJ1NGhrMC9EWVduZmRubEU0Y0FBQkFBQUFBQUFBQUFBQUlBQUFBQVZvYk9wWm1sWHJTUTRvU280SVY3aHFsb0NqcUgrRkhiK3JiYzBJUG5xNnpNdEhhL08yMnZQd3RpaVBhb3ZrUGV2bjhJMjJ2djRyT2FlSER0N3g0UnppNUlTVlVQbjQrZHhVZndrcXA2WDhoaUs5TlhYT2tDeUppa3NMTlJVbG1ObUlMcUdUQTZOSGs9Cg==\" npx tauri signer sign:*)",
+      "Bash(export TAURI_SIGNING_PRIVATE_KEY:*)",
+      "Bash(gh repo create:*)"
+    ]
+  }
+}

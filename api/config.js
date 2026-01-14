@@ -2,8 +2,8 @@ const CONFIG_KEY = 'model_config';
 
 // Default config
 const DEFAULT_CONFIG = {
-  provider: 'google',
-  model: 'gemini-3-flash-preview'
+  provider: 'anthropic',
+  model: 'claude-sonnet-4-20250514'
 };
 
 // In-memory fallback

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estimate Converter</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    // Auto-updater for Tauri
+    async function checkForUpdates() {
+      if (!window.__TAURI__) return;
+
+      try {
+        // Use Tauri's core invoke to call the updater plugin
+        const { invoke } = window.__TAURI__.core;
+
+        // Check for updates using the plugin command
+        const update = await invoke('plugin:updater|check');
+
+        if (update) {
+          const confirmed = confirm(
+            `Update ${update.version} is available!\n\n` +
+            `Current version: ${update.current_version}\n` +
+            `New version: ${update.version}\n\n` +
+            `Would you like to download and install it now?`
+          );
+
+          if (confirmed) {
+            // Download and install
+            await invoke('plugin:updater|download_and_install', { rid: update.rid });
+            // Relaunch the app
+            await invoke('plugin:process|restart');
+          }
+        }
+      } catch (e) {
+        console.log('Update check:', e);
+      }
+    }
+
+    // Check after a short delay to ensure Tauri is ready
+    setTimeout(checkForUpdates, 1000);
+  </script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background-color: #0f172a;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            'primary-hover': '#2563eb',
+            accent: '#10b981',
+            'accent-hover': '#059669',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useCallback } = React;
+    const { Upload, Copy, Check, Loader2, FileSpreadsheet, X } = lucide;
+
+    function EstimateConverter() {
+      const [file, setFile] = useState(null);
+      const [filePreview, setFilePreview] = useState(null);
+      const [fileName, setFileName] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [data, setData] = useState(null);
+      const [copied, setCopied] = useState(false);
+      const [error, setError] = useState(null);
+
+      // API endpoint pointing to your Vercel proxy
+      // This URL stays consistent across deployments
+      const API_ENDPOINT = 'https://estimate-to-excel-for-purchase-req.vercel.app/api/extract';
+
+      const processFile = (f) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64 = e.target.result.split(',')[1];
+          const isPdf = f.type === 'application/pdf';
+
+          setFile({ base64, type: f.type, isPdf });
+          setFileName(f.name);
+          setFilePreview(isPdf ? null : e.target.result);
+          setData(null);
+          setError(null);
+        };
+        reader.readAsDataURL(f);
+      };
+
+      const handleFileUpload = (e) => {
+        const f = e.target.files[0];
+        if (f) processFile(f);
+      };
+
+      const handlePaste = useCallback((e) => {
+        const items = e.clipboardData?.items;
+        if (items) {
+          for (let item of items) {
+            if (item.type.startsWith('image/')) {
+              processFile(item.getAsFile());
+              break;
+            }
+          }
+        }
+      }, []);
+
+      const handleDrop = (e) => {
+        e.preventDefault();
+        const f = e.dataTransfer.files[0];
+        if (f && (f.type.startsWith('image/') || f.type === 'application/pdf')) {
+          processFile(f);
+        }
+      };
+
+      const extractData = async () => {
+        if (!file) return;
+
+        setLoading(true);
+        setError(null);
+
+        try {
+          const contentArray = [];
+
+          if (file.isPdf) {
+            contentArray.push({
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: file.base64
+              }
+            });
+          } else {
+            contentArray.push({
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: file.type,
+                data: file.base64
+              }
+            });
+          }
+
+          contentArray.push({
+            type: "text",
+            text: `Extract all line items from this estimate/invoice/quote and return ONLY a JSON array. Each item should have these exact fields:
+- ln (line number, integer starting at 1)
+- partNum (part number or identifier - use the description/product name if no part number exists)
+- partDesc (description of the item/service)
+- uom (unit of measure: "EA" for each/individual items, "LOT" for bulk/services/flat fees)
+- unitPrice (price per unit as a number)
+- qty (quantity as a number)
+- lineType (always "Regular" unless specified otherwise)
+
+Return ONLY the JSON array, no other text. Example format:
+[{"ln":1,"partNum":"ABC-123","partDesc":"Machining services","uom":"EA","unitPrice":275,"qty":2,"lineType":"Regular"}]`
+          });
+
+          const response = await fetch(API_ENDPOINT, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              content: contentArray
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.error) {
+            setError('API Error: ' + (result.error.message || 'Unknown error'));
+            return;
+          }
+
+          const text = result.content?.[0]?.text || '';
+
+          const jsonMatch = text.match(/\[[\s\S]*\]/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            setData(parsed);
+          } else {
+            console.log('API Response:', text);
+            setError('Could not parse the response. Please try again. (Check console for details)');
+          }
+        } catch (err) {
+          setError('Error processing file: ' + err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const copyToClipboard = () => {
+        if (!data) return;
+
+        const rows = data.map(row =>
+          `${row.ln}\t${row.partNum}\t${row.partDesc}\t${row.uom}\t${row.unitPrice}\t${row.qty}\t${row.lineType}`
+        ).join('\n');
+
+        navigator.clipboard.writeText(rows);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      };
+
+      const clearAll = () => {
+        setFile(null);
+        setFilePreview(null);
+        setFileName('');
+        setData(null);
+        setError(null);
+      };
+
+      return (
+        <div
+          className="min-h-screen bg-slate-900 p-6"
+          onPaste={handlePaste}
+        >
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <lucide-icon name="file-spreadsheet" className="w-8 h-8 text-primary"></lucide-icon>
+                <h1 className="text-2xl font-bold text-white">Estimate → Excel Converter</h1>
+              </div>
+              <p className="text-slate-400">Upload a PDF or image, extract data, copy to Excel</p>
+            </div>
+
+            {!file ? (
+              <div
+                className="border-2 border-dashed border-slate-700 rounded-xl p-12 text-center bg-slate-800/50 hover:border-primary hover:bg-slate-800 transition-all cursor-pointer"
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
+                onClick={() => document.getElementById('fileInput').click()}
+              >
+                <lucide-icon name="upload" className="w-12 h-12 text-slate-500 mx-auto mb-4"></lucide-icon>
+                <p className="text-lg text-slate-300 mb-2">Drop file here, click to upload, or paste image (Ctrl+V)</p>
+                <p className="text-sm text-slate-500">Supports PDF, PNG, JPG, WEBP</p>
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept="image/*,.pdf,application/pdf"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-slate-800 rounded-xl p-4 shadow-lg border border-slate-700">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-sm font-medium text-slate-300">
+                      {file.isPdf ? '📄 PDF: ' : '🖼️ Image: '}{fileName}
+                    </span>
+                    <button onClick={clearAll} className="text-slate-500 hover:text-red-400 transition-colors">
+                      <lucide-icon name="x" className="w-5 h-5"></lucide-icon>
+                    </button>
+                  </div>
+                  {filePreview ? (
+                    <img
+                      src={filePreview}
+                      alt="Uploaded estimate"
+                      className="max-h-64 mx-auto rounded-lg border border-slate-700"
+                    />
+                  ) : (
+                    <div className="bg-slate-700 rounded-lg p-8 text-center">
+                      <div className="text-4xl mb-2">📄</div>
+                      <p className="text-slate-300">PDF ready for extraction</p>
+                    </div>
+                  )}
+                </div>
+
+                {!data && (
+                  <button
+                    onClick={extractData}
+                    disabled={loading}
+                    className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors shadow-lg shadow-primary/20"
+                  >
+                    {loading ? (
+                      <>
+                        <lucide-icon name="loader-2" className="w-5 h-5 animate-spin"></lucide-icon>
+                        Extracting data...
+                      </>
+                    ) : (
+                      'Extract Data'
+                    )}
+                  </button>
+                )}
+
+                {error && (
+                  <div className="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-lg flex justify-between items-center">
+                    <span>{error}</span>
+                    <button
+                      onClick={clearAll}
+                      className="flex items-center gap-2 px-3 py-1 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors ml-4"
+                    >
+                      <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
+                      Start Over
+                    </button>
+                  </div>
+                )}
+
+                {data && (
+                  <div className="bg-slate-800 rounded-xl shadow-lg border border-slate-700 overflow-hidden">
+                    <div className="flex justify-between items-center p-4 border-b border-slate-700">
+                      <span className="font-medium text-slate-200">Extracted Data ({data.length} rows)</span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={copyToClipboard}
+                          className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors shadow-lg shadow-accent/20"
+                        >
+                          {copied ? (
+                            <>
+                              <lucide-icon name="check" className="w-4 h-4"></lucide-icon>
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <lucide-icon name="copy" className="w-4 h-4"></lucide-icon>
+                              Copy for Excel
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={clearAll}
+                          className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                        >
+                          <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
+                          Start Over
+                        </button>
+                      </div>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-700">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-slate-300">Ln #</th>
+                            <th className="px-3 py-2 text-left text-slate-300">Part #</th>
+                            <th className="px-3 py-2 text-left text-slate-300">Part Desc</th>
+                            <th className="px-3 py-2 text-left text-slate-300">UOM</th>
+                            <th className="px-3 py-2 text-right text-slate-300">Unit Price</th>
+                            <th className="px-3 py-2 text-right text-slate-300">Qty</th>
+                            <th className="px-3 py-2 text-left text-slate-300">Line Type</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.map((row, i) => (
+                            <tr key={i} className="border-t border-slate-700 hover:bg-slate-700/50 transition-colors">
+                              <td className="px-3 py-2 text-slate-300">{row.ln}</td>
+                              <td className="px-3 py-2 font-mono text-xs text-primary">{row.partNum}</td>
+                              <td className="px-3 py-2 text-slate-300">{row.partDesc}</td>
+                              <td className="px-3 py-2 text-slate-300">{row.uom}</td>
+                              <td className="px-3 py-2 text-right text-accent">${row.unitPrice}</td>
+                              <td className="px-3 py-2 text-right text-slate-300">{row.qty}</td>
+                              <td className="px-3 py-2 text-slate-400">{row.lineType}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <p className="text-center text-xs text-slate-500 mt-8">
+              Tip: You can paste images directly with Ctrl+V (or Cmd+V on Mac)
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Render the app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<EstimateConverter />);
+  </script>
+</body>
+</html>
