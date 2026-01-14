@@ -1,11 +1,11 @@
 {
-  "version": "1.1.3",
-  "notes": "Improved How to Use instructions: Step 5 image now full width, Step 6 image twice as large for better visibility",
-  "pub_date": "2026-01-14T23:10:31Z",
+  "version": "1.1.4",
+  "notes": "App renamed to 'Purchase Requisition Helper' and updated desktop icon to use Dukane logo",
+  "pub_date": "2026-01-14T23:20:26Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzdZWmlDbnNjNHBnYmVxdEcyanRJZ1ZaaVYvcjJjeE9zK1QvekFpZWpjWTd5RFFpVWNiVWhYNHFjckxnVjFPZVJRODU5dnlQYmI2SGNTQjdBYXd1ekE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDMyMjEzCWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMS4zX3g2NC1zZXR1cC5leGUKVENyZys2Q2QrdHM5Yk1CQnJwSC9lNk80THFwQnUwYUVGaThZS3hJVlBTVDZ3RmxxUDlzblpSRU1iVEQ3Z1NzWXNGWGgycnJHRGhFTWQ5YktKY3BwQ0E9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.3/Estimate.Converter_1.1.3_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3grMFZCVWg4ZjlMK0V0cU05YmlQeVlOMVd4V3phdE1qTUdYN0VOakxhTEpZUDhHNW9rbmZYSWh2NG9JK2lDNjlBd3QrY0htZjJralB5ckxld1Y3Znc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDMyODI2CWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS40X3g2NC1zZXR1cC5leGUKTnVSQktKSHFxRWIzYy9PRnA0VE5pbC93ZFlEOE1uTVRWNE53ZW5WTjdSTUNMYjA0N1o5RTROaEFGd0RRbERmTi9jNWN6ZnQ2YlcyYzNkZzRaT3pqQkE9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.4/Purchase.Requisition.Helper_1.1.4_x64-setup.exe"
     }
   }
 }
