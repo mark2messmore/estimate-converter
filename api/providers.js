@@ -71,9 +71,23 @@ export async function callGoogle(apiKey, model, content) {
     throw { status: response.status, data };
   }
 
+  // Check for blocked or empty responses
+  const candidate = data.candidates?.[0];
+  if (!candidate) {
+    const blockReason = data.promptFeedback?.blockReason;
+    if (blockReason) {
+      throw { status: 400, data: { error: `Content blocked: ${blockReason}` } };
+    }
+    throw { status: 500, data: { error: 'No response from model', details: JSON.stringify(data) } };
+  }
+
+  if (candidate.finishReason === 'SAFETY') {
+    throw { status: 400, data: { error: 'Response blocked by safety filter' } };
+  }
+
   // Normalize response format
   return {
-    text: data.candidates?.[0]?.content?.parts?.[0]?.text || '',
+    text: candidate.content?.parts?.[0]?.text || '',
     usage: data.usageMetadata,
     model: model,
     raw: data
