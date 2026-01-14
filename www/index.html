@@ -10,27 +10,41 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
-    // Auto-updater for Tauri using the proper plugin API
-    async function checkForUpdates() {
-      if (!window.__TAURI__) return;
+    // Auto-updater for Tauri v2 using proper plugin API
+    // Key fix: check update?.available (not just if(update)) due to plugin v2.9.0 bug
+    async function checkForUpdates(silent = true) {
+      if (!window.__TAURI__) {
+        if (!silent) alert('Updates only available in desktop app');
+        return;
+      }
 
       try {
-        // Import the updater plugin from Tauri's plugin system
+        // Import Tauri plugins
         const { check } = await import('https://unpkg.com/@tauri-apps/plugin-updater@2/dist/index.min.js');
+        const { ask, message } = await import('https://unpkg.com/@tauri-apps/plugin-dialog@2/dist/index.min.js');
         const { relaunch } = await import('https://unpkg.com/@tauri-apps/plugin-process@2/dist/index.min.js');
 
         console.log('Checking for updates...');
         const update = await check();
         console.log('Update check result:', update);
 
-        if (update) {
-          const confirmed = confirm(
-            `Update ${update.version} is available!\n\n` +
-            `Release notes: ${update.body || 'No notes'}\n\n` +
-            `Would you like to download and install it now?`
+        // IMPORTANT: Check update?.available, not just if(update)
+        // Plugin v2.9.0 always returns an object, so we must check the .available property
+        if (update?.available) {
+          console.log(`Update available: ${update.version}`);
+
+          // Use Tauri's native ask() dialog instead of browser confirm()
+          const shouldUpdate = await ask(
+            `Version ${update.version} is available!\n\nRelease Notes:\n${update.body || 'Bug fixes and improvements'}`,
+            {
+              title: 'Update Available',
+              kind: 'info',
+              okLabel: 'Update Now',
+              cancelLabel: 'Later'
+            }
           );
 
-          if (confirmed) {
+          if (shouldUpdate) {
             console.log('Downloading and installing update...');
             await update.downloadAndInstall();
             console.log('Update installed, relaunching...');
@@ -38,14 +52,23 @@
           }
         } else {
           console.log('No update available');
+          if (!silent) {
+            await message('You are running the latest version!', { title: 'No Updates', kind: 'info' });
+          }
         }
       } catch (e) {
-        console.log('Update check error:', e);
+        console.error('Update check error:', e);
+        if (!silent) {
+          alert('Error checking for updates: ' + e.message);
+        }
       }
     }
 
-    // Check after a short delay to ensure Tauri is ready
-    setTimeout(checkForUpdates, 2000);
+    // Export for manual check button
+    window.checkForUpdates = checkForUpdates;
+
+    // Auto-check after app loads (silent mode)
+    setTimeout(() => checkForUpdates(true), 2000);
 
     // Export save function for use by React component
     window.saveFileWithTauri = async function(filename, content) {
@@ -118,7 +141,7 @@
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X } = lucide;
 
     // App version - update this when releasing new versions
-    const APP_VERSION = '1.0.6';
+    const APP_VERSION = '1.0.7';
 
     function EstimateConverter() {
       const [file, setFile] = useState(null);
@@ -468,9 +491,17 @@ ${JSON.stringify(lastApiResponse, null, 2)}
             <p className="text-center text-xs text-slate-500 mt-8">
               Tip: You can paste images directly with Ctrl+V (or Cmd+V on Mac)
             </p>
-            <p className="text-center text-xs text-slate-600 mt-2">
-              v{APP_VERSION}
-            </p>
+            <div className="flex items-center justify-center gap-4 mt-2">
+              <span className="text-xs text-slate-600">v{APP_VERSION}</span>
+              {window.__TAURI__ && (
+                <button
+                  onClick={() => window.checkForUpdates(false)}
+                  className="text-xs text-slate-500 hover:text-primary transition-colors underline"
+                >
+                  Check for Updates
+                </button>
+              )}
+            </div>
           </div>
         </div>
       );

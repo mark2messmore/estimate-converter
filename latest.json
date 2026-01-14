@@ -1,11 +1,11 @@
 {
-  "version": "1.0.6",
-  "notes": "Added Start Over button when file is selected",
-  "pub_date": "2026-01-14T19:30:00Z",
+  "version": "1.0.7",
+  "notes": "Fixed auto-updater: now properly checks for available updates using Tauri native dialogs",
+  "pub_date": "2026-01-14T20:10:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5Uyt3aEdpM09qamgxWkhsSmc1eGwzdENid2VKN1lyZDMzcjhaNmVkRHRvd0JORjl3aU9vZlNQcS91c3VrRXAzaHNndzQ0RHFZeU14dTFWS2VZVlFNa0FjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDE3NDkyCWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMC42X3g2NC1zZXR1cC5leGUKZTgrU3BsYWhHbFBXeE1hVHQwVjJxeUJTL3Bna3Qwd3pVcTdHaW5tcGNrL2NlRFdoV0FrcFcrams5a1hzZnN5Zlo3Q1dZeUdxTWhYYkw5d1MxRC9OQWc9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.0.6/Estimate.Converter_1.0.6_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3duQzNhbkpxVmZxM1hxTndObWtUYWV4OFpKV1lHRHcrZkxDNGgrOFN5Tk4xaEVma01DZ25MbkE2bEx1VkxiWE5hdHNhaEFZQjIvQ0EyL1ZYVjlHZGdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDE4OTg4CWZpbGU6RXN0aW1hdGUgQ29udmVydGVyXzEuMC43X3g2NC1zZXR1cC5leGUKRGFMU2ZKVU1yRXJJbUx1Vmd1YVEwM2dkeTVPVEw2bW5nVy9yQkg0emd5NUNiUEJhZUN1VTJwczRHWDc0T1RMRGIyYk4xS2lXMG9SQ2NZMXprWEdOQVE9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.0.7/Estimate.Converter_1.0.7_x64-setup.exe"
     }
   }
 }
