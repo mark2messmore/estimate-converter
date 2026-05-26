@@ -3,11 +3,6 @@ dist/
 *.log
 .env
 .env.local
-.vercel
-
-# Cloudflare Workers
-.wrangler/
-.dev.vars
 
 # Tauri build output
 src-tauri/target/
@@ -16,7 +11,7 @@ src-tauri/target/
 update-keys.key
 code-signing.pfx
 
-# Release guide (internal only)
+# Release runbook with embedded signing password — local only
 RELEASE-GUIDE.md
 
 # Temp files
@@ -25,5 +20,6 @@ tmpclaude-*
 # Release installers (uploaded to GitHub releases, not repo)
 *.exe
 
-# Old folders (not needed)
-public/
+# Cloudflare Workers
+.wrangler/
+.dev.vars
