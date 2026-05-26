@@ -5,6 +5,10 @@ dist/
 .env.local
 .vercel
 
+# Cloudflare Workers
+.wrangler/
+.dev.vars
+
 # Tauri build output
 src-tauri/target/
 

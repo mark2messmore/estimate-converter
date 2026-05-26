@@ -1,0 +1,11 @@
+name = "purchase-req-helper"
+main = "worker/index.js"
+compatibility_date = "2026-05-01"
+
+# Static frontend (www/) served by the Worker at non-/api paths
+[assets]
+directory = "./www"
+binding = "ASSETS"
+
+# Secret (set via `npx wrangler secret put ANTHROPIC_API_KEY`).
+# For local dev, same name goes in `.dev.vars` (gitignored).

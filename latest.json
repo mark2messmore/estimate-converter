@@ -1,11 +1,11 @@
 {
-  "version": "1.1.5",
-  "notes": "Updated desktop and taskbar icon to clean yellow D on transparent background",
-  "pub_date": "2026-01-14T23:33:23Z",
+  "version": "1.1.6",
+  "notes": "Migrated backend from Vercel to Cloudflare Workers",
+  "pub_date": "2026-05-26T13:51:39Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3lDTUJZdUlHOWNoaGNLNmV5RHZnSVdDN3JGSVVpcHNySk5lWlhpWnY5OWN5VHUwL3JpdFlJYjBTbGV2aC9zcWEzMTVoQkFLQmhxWlFVcHowK0tZOFE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY4NDMzNjAzCWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS41X3g2NC1zZXR1cC5leGUKU1U3bk9GYTdNbS9GQy9rckdKaGFDQ2wwS2VuMjJJR3VXVWxhd2ZZR2EwSXZ5eXRoenVNcloveGYyNkdzZGRSQ2hvSGlyN2ROVWFnQVNjOU9vYjlwQ3c9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.5/Purchase.Requisition.Helper_1.1.5_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3owbUcrUzNhZXNWOEhkVHZLTmdrVjdYSXJpeDlyQy9ONUVkMGZHVjdWOE1IRXZtSFVKSjNKdlhTbXovVlE3NEdJRmNjQ3VyQ0drc3F2Rm11bDJTTEFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc5ODAzNDk2CWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS42X3g2NC1zZXR1cC5leGUKb0Y0c0xOQnc4cys4cU1ObG5JQTllOWJERG1lK3ZPRkExbG5RUC9VM0hDZHdSNTNXWFE0QmhydHJSSEZMZGQweGpNWms4S05SeDBHRlNEZ2E4UW00Q2c9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.6/Purchase.Requisition.Helper_1.1.6_x64-setup.exe"
     }
   }
 }

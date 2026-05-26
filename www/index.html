@@ -142,7 +142,7 @@
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X, Info, ChevronDown } = lucide;
 
     // App version - update this when releasing new versions
-    const APP_VERSION = '1.1.5';
+    const APP_VERSION = '1.1.6';
 
     function EstimateConverter() {
       const [file, setFile] = useState(null);
@@ -154,9 +154,11 @@
       const [error, setError] = useState(null);
       const [lastApiResponse, setLastApiResponse] = useState(null);
 
-      // API endpoint pointing to your Vercel proxy
-      // This URL stays consistent across deployments
-      const API_ENDPOINT = 'https://estimate-to-excel-for-purchase-req.vercel.app/api/extract';
+      // API endpoint. The desktop (Tauri) build hits the Cloudflare Worker by absolute URL;
+      // the browser build (served from the Worker itself) uses a same-origin relative path.
+      // PROD_API_URL is filled in after the first `wrangler deploy` prints the workers.dev subdomain.
+      const PROD_API_URL = 'https://purchase-req-helper.mark2messmore.workers.dev/api/extract';
+      const API_ENDPOINT = window.__TAURI__ ? PROD_API_URL : '/api/extract';
 
       const processFile = (f) => {
         const reader = new FileReader();
