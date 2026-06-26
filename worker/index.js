@@ -6,7 +6,6 @@ const MODELS = ['claude-sonnet-4-6', 'claude-opus-4-8'];
 const MAX_TOKENS = 4000;
 
 const ANTHROPIC_MESSAGES = 'https://api.anthropic.com/v1/messages';
-const ANTHROPIC_MODELS = 'https://api.anthropic.com/v1/models';
 const ANTHROPIC_VERSION = '2023-06-01';
 
 const CORS = {
@@ -68,19 +67,37 @@ async function handleExtract(request, env) {
 
 // --- Daily model-health check (cron) ---------------------------------------
 
-// 'alive' (200) | 'retired' (404) | 'unknown' (anything else / network error).
-// 'unknown' covers transient API trouble (429/5xx/timeout) and auth issues —
-// we deliberately do NOT alert on those, only on a definitive retirement.
-async function modelStatus(env, model) {
+// Runs a tiny REAL extraction against one model — the true end-to-end test of
+// the pipeline (key valid & funded, Anthropic reachable, model serving, shape ok).
+// Costs ~a dozen tokens. Classifies the outcome:
+//   'working'      200 — pipeline healthy on this model
+//   'retired'      404 not_found — model id no longer exists
+//   'auth'         401/403 — API key invalid, expired, or revoked
+//   'rate_limited' 429 — over rate limit or, often, out of credits/quota
+//   'error'        5xx / network — transient, don't over-react
+async function probeModel(env, model) {
   try {
-    const r = await fetch(`${ANTHROPIC_MODELS}/${model}`, {
-      headers: { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': ANTHROPIC_VERSION }
+    const r = await fetch(ANTHROPIC_MESSAGES, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': ANTHROPIC_VERSION
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 16,
+        messages: [{ role: 'user', content: 'Reply with the single word: OK' }]
+      })
     });
-    if (r.status === 200) return 'alive';
-    if (r.status === 404) return 'retired';
-    return 'unknown';
+    if (r.status === 200) return 'working';
+    if (r.status === 401 || r.status === 403) return 'auth';
+    if (r.status === 429) return 'rate_limited';
+    const data = await r.json().catch(() => ({}));
+    if (r.status === 404 && data?.error?.type === 'not_found_error') return 'retired';
+    return 'error';
   } catch {
-    return 'unknown';
+    return 'error';
   }
 }
 
@@ -95,33 +112,41 @@ async function notifyTelegram(env, text) {
   });
 }
 
-// Builds and sends the daily 6am status report. Uses the free Models API
-// (no tokens billed). Always sends one message; tone escalates with severity
-// so a routine ✅ never looks like a retirement ⚠️/🚨.
+// Builds and sends the daily 6am status report. Probes each model with a real
+// extraction (see probeModel). Always sends one message; tone escalates with
+// severity so a routine ✅ never looks like an outage.
 async function sendDailyStatus(env) {
   if (!env.ANTHROPIC_API_KEY) return;
 
-  const statuses = {};
-  for (const m of MODELS) statuses[m] = await modelStatus(env, m);
+  const results = {};
+  for (const m of MODELS) results[m] = await probeModel(env, m);
 
   const primary = MODELS[0];
-  const aliveFallback = MODELS.find(m => statuses[m] === 'alive');
-  const icon = s => (s === 'alive' ? '✅' : s === 'retired' ? '❌' : '❔');
-  const detail = MODELS.map(m => `${icon(statuses[m])} <code>${m}</code> — ${statuses[m]}`).join('\n');
+  const working = MODELS.find(m => results[m] === 'working');
+  const any = s => MODELS.some(m => results[m] === s);
+
+  const icon = { working: '✅', retired: '❌', auth: '🔑', rate_limited: '⏳', error: '❔' };
+  const label = { working: 'working', retired: 'retired', auth: 'key rejected', rate_limited: 'rate-limited', error: 'unverified' };
+  const detail = MODELS.map(m => `${icon[results[m]]} <code>${m}</code> — ${label[results[m]]}`).join('\n');
 
   let head;
-  if (statuses[primary] === 'alive') {
-    head = `✅ <b>Purchase Req Helper — all systems normal</b>\nPrimary model <code>${primary}</code> is live.`;
-  } else if (statuses[primary] === 'retired' && aliveFallback) {
-    head = `⚠️ <b>Purchase Req Helper</b>\nPrimary model <code>${primary}</code> is RETIRED.\n` +
-      `Extraction still works on fallback <code>${aliveFallback}</code> — update the MODELS list in ` +
-      `worker/index.js and redeploy to restore a fresh primary + fallback.`;
-  } else if (statuses[primary] === 'retired') {
+  if (results[primary] === 'working') {
+    head = `✅ <b>Purchase Req Helper — all systems normal</b>\nLive end-to-end extraction on <code>${primary}</code> passed.`;
+  } else if (working) {
+    head = `⚠️ <b>Purchase Req Helper</b>\nPrimary <code>${primary}</code> isn't serving (${label[results[primary]]}), ` +
+      `but extraction works on <code>${working}</code>. Refresh the MODELS list and redeploy.`;
+  } else if (any('auth')) {
+    head = `🚨 <b>Purchase Req Helper — EXTRACTION DOWN</b>\nThe Anthropic API key is being rejected ` +
+      `(invalid, expired, or revoked). Rotate ANTHROPIC_API_KEY and redeploy.`;
+  } else if (any('rate_limited')) {
+    head = `🚨 <b>Purchase Req Helper — extraction failing</b>\nEvery model hit rate-limit/quota errors ` +
+      `— likely out of credits or over the limit. Check the Anthropic billing/usage dashboard.`;
+  } else if (MODELS.every(m => results[m] === 'retired')) {
     head = `🚨 <b>Purchase Req Helper — EXTRACTION DOWN</b>\nEvery configured model is retired. ` +
       `Add a current model to MODELS in worker/index.js and redeploy.`;
   } else {
-    head = `❔ <b>Purchase Req Helper — status unverified</b>\nThe Anthropic API returned an error ` +
-      `during the check (transient). Extraction itself is unaffected; will recheck tomorrow.`;
+    head = `❔ <b>Purchase Req Helper — status unverified</b>\nThe Anthropic API returned transient errors ` +
+      `during the check. Extraction may be fine; will recheck tomorrow.`;
   }
 
   await notifyTelegram(env, `${head}\n\n${detail}`);
