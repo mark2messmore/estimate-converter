@@ -1,11 +1,11 @@
 {
-  "version": "1.1.7",
-  "notes": "Fixes a startup issue that could leave the app on a blank screen. The app now loads its interface fully offline and is more reliable on restricted networks.",
-  "pub_date": "2026-06-26T15:21:19Z",
+  "version": "1.1.8",
+  "notes": "Maintenance release. Backend reliability improvements to the extraction service (already active server-side) and auto-update verification.",
+  "pub_date": "2026-06-26T15:33:53Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzVDL1Z2dVd2RzJzQWxnNHVSeW5PWmxxYkdPOFppY2YrUTR0YTNWL2VHRHZXSm5uK3piM00vVCtxTDFEdkhtMmVMZTkwem4xOHBRU1R3b1Z2Z0QvT3dVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgyNDg3Mjc5CWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS43X3g2NC1zZXR1cC5leGUKOTJKalZFakY2VEYyQlp4aGdlVjZNMk1yYURHSVI3dDQ0aEJJSnpKLzN1cG00a0xrU2MxSTRSRnJqR1lCd0ttbXdTM20wenR6NzV0cUxDSFEvQzBIQ3c9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.7/Purchase.Requisition.Helper_1.1.7_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzFFU3NsRjZCQlhzMEs0N1Vld1U5UlF4VFFWRUtveWR6Qisxdy95K1ZKN2FZc0lSSGNMTGwrZU83L3hLa0JqODllRHlLWUdxUW1XeDRuSFkrOHpsRHdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgyNDg4MDMzCWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS44X3g2NC1zZXR1cC5leGUKbWxLWDFUZ2VESnZNYTg1ZVlCYjNTa0srV1ZNQWRscHVxQXVvaEVPWGlpaVphalU5NXU4Z0tkWFlWa3Evam5acGs5RW9oZHhWWGtDNXRLaVZDdm1WQWc9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.8/Purchase.Requisition.Helper_1.1.8_x64-setup.exe"
     }
   }
 }
