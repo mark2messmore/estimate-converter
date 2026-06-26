@@ -7,5 +7,13 @@ compatibility_date = "2026-05-01"
 directory = "./www"
 binding = "ASSETS"
 
-# Secret (set via `npx wrangler secret put ANTHROPIC_API_KEY`).
-# For local dev, same name goes in `.dev.vars` (gitignored).
+# Secrets (set via `npx wrangler secret put <NAME>`; for local dev, same names in `.dev.vars`):
+#   ANTHROPIC_API_KEY   - required, the Anthropic key
+#   TELEGRAM_BOT_TOKEN  - optional, enables daily model-retirement alerts
+#   TELEGRAM_CHAT_ID    - optional, the recipient's numeric chat id
+# Until the two TELEGRAM_* secrets are set, the cron check runs but stays silent.
+
+# Daily model-health check at 13:00 UTC (~8am US Central). Fires the scheduled()
+# handler, which Telegram-alerts only if the primary model has been retired.
+[triggers]
+crons = ["0 13 * * *"]
