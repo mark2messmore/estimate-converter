@@ -95,27 +95,34 @@ async function notifyTelegram(env, text) {
   });
 }
 
-// Uses the free Models API (no tokens billed). Alerts ONLY when the primary
-// model is definitively retired — no daily "all good" spam.
-async function checkModelHealth(env) {
+// Builds and sends the daily 6am status report. Uses the free Models API
+// (no tokens billed). Always sends one message; tone escalates with severity
+// so a routine ✅ never looks like a retirement ⚠️/🚨.
+async function sendDailyStatus(env) {
   if (!env.ANTHROPIC_API_KEY) return;
 
   const statuses = {};
   for (const m of MODELS) statuses[m] = await modelStatus(env, m);
 
   const primary = MODELS[0];
-  if (statuses[primary] !== 'retired') return; // primary fine (or only a transient blip) — stay quiet
-
   const aliveFallback = MODELS.find(m => statuses[m] === 'alive');
   const icon = s => (s === 'alive' ? '✅' : s === 'retired' ? '❌' : '❔');
   const detail = MODELS.map(m => `${icon(statuses[m])} <code>${m}</code> — ${statuses[m]}`).join('\n');
 
-  const head = aliveFallback
-    ? `⚠️ <b>Purchase Req Helper</b>\nPrimary model <code>${primary}</code> is RETIRED.\n` +
+  let head;
+  if (statuses[primary] === 'alive') {
+    head = `✅ <b>Purchase Req Helper — all systems normal</b>\nPrimary model <code>${primary}</code> is live.`;
+  } else if (statuses[primary] === 'retired' && aliveFallback) {
+    head = `⚠️ <b>Purchase Req Helper</b>\nPrimary model <code>${primary}</code> is RETIRED.\n` +
       `Extraction still works on fallback <code>${aliveFallback}</code> — update the MODELS list in ` +
-      `worker/index.js and redeploy to restore a fresh primary + fallback.`
-    : `🚨 <b>Purchase Req Helper — EXTRACTION DOWN</b>\nEvery configured model is retired. ` +
+      `worker/index.js and redeploy to restore a fresh primary + fallback.`;
+  } else if (statuses[primary] === 'retired') {
+    head = `🚨 <b>Purchase Req Helper — EXTRACTION DOWN</b>\nEvery configured model is retired. ` +
       `Add a current model to MODELS in worker/index.js and redeploy.`;
+  } else {
+    head = `❔ <b>Purchase Req Helper — status unverified</b>\nThe Anthropic API returned an error ` +
+      `during the check (transient). Extraction itself is unaffected; will recheck tomorrow.`;
+  }
 
   await notifyTelegram(env, `${head}\n\n${detail}`);
 }
@@ -127,8 +134,14 @@ export default {
     return env.ASSETS.fetch(request);
   },
 
-  // Fires on the cron schedule in wrangler.toml (daily, UTC).
+  // Two UTC crons (11:00 + 12:00, in wrangler.toml) bracket 6am US Central
+  // across DST; this guard makes exactly one of them fire at 6:00am
+  // America/Chicago year-round, then sends the daily status report.
   async scheduled(controller, env, ctx) {
-    ctx.waitUntil(checkModelHealth(env));
+    const hour = Number(new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago', hour: 'numeric', hour12: false
+    }).format(new Date(controller.scheduledTime)));
+    if (hour !== 6) return;
+    ctx.waitUntil(sendDailyStatus(env));
   }
 };
