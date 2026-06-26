@@ -1,11 +1,11 @@
 {
-  "version": "1.1.6",
-  "notes": "Migrated backend from Vercel to Cloudflare Workers",
-  "pub_date": "2026-05-26T13:51:39Z",
+  "version": "1.1.7",
+  "notes": "Fixes a startup issue that could leave the app on a blank screen. The app now loads its interface fully offline and is more reliable on restricted networks.",
+  "pub_date": "2026-06-26T15:21:19Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5U3owbUcrUzNhZXNWOEhkVHZLTmdrVjdYSXJpeDlyQy9ONUVkMGZHVjdWOE1IRXZtSFVKSjNKdlhTbXovVlE3NEdJRmNjQ3VyQ0drc3F2Rm11bDJTTEFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc5ODAzNDk2CWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS42X3g2NC1zZXR1cC5leGUKb0Y0c0xOQnc4cys4cU1ObG5JQTllOWJERG1lK3ZPRkExbG5RUC9VM0hDZHdSNTNXWFE0QmhydHJSSEZMZGQweGpNWms4S05SeDBHRlNEZ2E4UW00Q2c9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.6/Purchase.Requisition.Helper_1.1.6_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzVDL1Z2dVd2RzJzQWxnNHVSeW5PWmxxYkdPOFppY2YrUTR0YTNWL2VHRHZXSm5uK3piM00vVCtxTDFEdkhtMmVMZTkwem4xOHBRU1R3b1Z2Z0QvT3dVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgyNDg3Mjc5CWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS43X3g2NC1zZXR1cC5leGUKOTJKalZFakY2VEYyQlp4aGdlVjZNMk1yYURHSVI3dDQ0aEJJSnpKLzN1cG00a0xrU2MxSTRSRnJqR1lCd0ttbXdTM20wenR6NzV0cUxDSFEvQzBIQ3c9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.7/Purchase.Requisition.Helper_1.1.7_x64-setup.exe"
     }
   }
 }

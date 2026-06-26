@@ -4,11 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quote/Estimate to Purchase Req</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!--
+    Surface any startup failure on-screen instead of a silent blank/blue window.
+    Must come first so it also catches <script> load failures below.
+  -->
+  <script>
+    (function () {
+      function showError(title, detail) {
+        var el = document.getElementById('startup-error');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'startup-error';
+          el.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#fff;color:#111;' +
+            'font:14px/1.5 system-ui,Segoe UI,sans-serif;padding:24px;overflow:auto;white-space:pre-wrap;';
+          (document.body || document.documentElement).appendChild(el);
+        }
+        el.textContent = 'The app failed to start.\n\n' + title + '\n\n' + (detail || '') +
+          '\n\nThis usually means a required local script in www/libs failed to load.';
+      }
+      window.addEventListener('error', function (e) {
+        if (e && e.target && e.target.tagName === 'SCRIPT') {
+          showError('Failed to load script: ' + (e.target.src || '(inline)'), '');
+        } else if (e && e.message) {
+          showError(e.message, (e.filename || '') + ':' + (e.lineno || ''));
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function (e) {
+        showError('Unhandled promise rejection', String(e && e.reason));
+      });
+    })();
+  </script>
+
+  <!-- Libraries are vendored locally (www/libs) and version-pinned so the desktop app -->
+  <!-- is fully self-contained: no runtime CDN dependency, works offline and behind -->
+  <!-- locked-down corporate networks. To upgrade, re-download the pinned file. -->
+  <script src="libs/react.production.min.js"></script>        <!-- react@18.3.1 -->
+  <script src="libs/react-dom.production.min.js"></script>    <!-- react-dom@18.3.1 -->
+  <script src="libs/tailwind.js"></script>                    <!-- tailwindcss Play CDN (vendored) -->
+  <script src="libs/lucide.min.js"></script>                  <!-- lucide@1.21.0 -->
+  <script src="libs/babel.min.js"></script>                   <!-- @babel/standalone@7.26.4 -->
+  <script>
+    // Hard-fail loudly if a global is missing, rather than throwing deep in the
+    // text/babel block (which Babel swallows into a console message the user never sees).
+    (function () {
+      var missing = ['React', 'ReactDOM', 'Babel', 'lucide'].filter(function (g) {
+        return typeof window[g] === 'undefined';
+      });
+      if (missing.length && window.dispatchEvent) {
+        window.dispatchEvent(new ErrorEvent('error', {
+          message: 'Required library did not load: ' + missing.join(', ')
+        }));
+      }
+    })();
+  </script>
   <script type="module">
     // Auto-updater for Tauri v2 using local shim
     async function checkForUpdates(silent = true) {
@@ -142,7 +191,7 @@
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X, Info, ChevronDown } = lucide;
 
     // App version - update this when releasing new versions
-    const APP_VERSION = '1.1.6';
+    const APP_VERSION = '1.1.7';
 
     function EstimateConverter() {
       const [file, setFile] = useState(null);
