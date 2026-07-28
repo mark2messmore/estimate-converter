@@ -187,11 +187,45 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useCallback, useEffect } = React;
+    const { useState, useCallback, useEffect, useMemo } = React;
     const { Upload, Copy, Check, Loader2, FileSpreadsheet, X, Info, ChevronDown } = lucide;
 
     // App version - update this when releasing new versions
-    const APP_VERSION = '1.1.8';
+    const APP_VERSION = '1.1.9';
+
+    // Presentational table shared by the single-order and per-order views.
+    function DataTable({ rows }) {
+      return (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-700">
+              <tr>
+                <th className="px-3 py-2 text-left text-slate-300">Ln #</th>
+                <th className="px-3 py-2 text-left text-slate-300">Part #</th>
+                <th className="px-3 py-2 text-left text-slate-300">Part Desc</th>
+                <th className="px-3 py-2 text-left text-slate-300">UOM</th>
+                <th className="px-3 py-2 text-right text-slate-300">Unit Price</th>
+                <th className="px-3 py-2 text-right text-slate-300">Qty</th>
+                <th className="px-3 py-2 text-left text-slate-300">Line Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <tr key={i} className="border-t border-slate-700 hover:bg-slate-700/50 transition-colors">
+                  <td className="px-3 py-2 text-slate-300">{i + 1}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-primary">{row.partNum}</td>
+                  <td className="px-3 py-2 text-slate-300">{row.partDesc}</td>
+                  <td className="px-3 py-2 text-slate-300">{row.uom}</td>
+                  <td className="px-3 py-2 text-right text-accent">${row.unitPrice}</td>
+                  <td className="px-3 py-2 text-right text-slate-300">{row.qty}</td>
+                  <td className="px-3 py-2 text-slate-400">{row.lineType}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
 
     function EstimateConverter() {
       const [file, setFile] = useState(null);
@@ -199,7 +233,8 @@
       const [fileName, setFileName] = useState('');
       const [loading, setLoading] = useState(false);
       const [data, setData] = useState(null);
-      const [copied, setCopied] = useState(false);
+      // Which block was last copied: null, '__all__', or a group name.
+      const [copiedKey, setCopiedKey] = useState(null);
       const [error, setError] = useState(null);
       const [lastApiResponse, setLastApiResponse] = useState(null);
 
@@ -281,16 +316,30 @@
           contentArray.push({
             type: "text",
             text: `Extract all line items from this estimate/invoice/quote and return ONLY a JSON array. Each item should have these exact fields:
-- ln (line number, integer starting at 1)
+- ln (line number, integer starting at 1; restart at 1 within each group)
 - partNum (part number or identifier - use the description/product name if no part number exists)
 - partDesc (description of the item/service)
 - uom (unit of measure: "EA" for each/individual items, "LOT" for bulk/services/flat fees)
 - unitPrice (price per unit as a number)
 - qty (quantity as a number)
 - lineType (always "Regular" unless specified otherwise)
+- group (see below; null when the document is a single order)
+
+About "group": some quotes cover more than one order in a single document. These are
+marked by a section header row containing only a project/assembly number (for example a
+row reading just "577224-01" sitting above a block of items, then later "577224-03" above
+another block), and the item numbering usually restarts at 1 in each block. When you see
+this, set "group" to that header's exact text for every item beneath it.
+
+If the document is a single order with no such section headers, set "group" to null on
+every item. Do NOT invent groups from ordinary category or subtotal headings, and do not
+group by material, finish, or supplier. Only split when the document genuinely represents
+separate orders.
+
+The same part may legitimately appear in more than one group - keep both occurrences.
 
 Return ONLY the JSON array, no other text. Example format:
-[{"ln":1,"partNum":"ABC-123","partDesc":"Machining services","uom":"EA","unitPrice":275,"qty":2,"lineType":"Regular"}]`
+[{"ln":1,"partNum":"ABC-123","partDesc":"Machining services","uom":"EA","unitPrice":275,"qty":2,"lineType":"Regular","group":null}]`
           });
 
           const response = await fetch(API_ENDPOINT, {
@@ -328,15 +377,17 @@ Return ONLY the JSON array, no other text. Example format:
         }
       };
 
-      const copyToClipboard = () => {
-        if (!data) return;
+      // Line numbers are renumbered from 1 at copy time rather than trusting the model's
+      // `ln`, so each order pastes into its own requisition starting at Ln 1.
+      const copyRows = (rows, key) => {
+        if (!rows || !rows.length) return;
 
-        const rows = data.map(row =>
-          `${row.ln}\t${row.partNum}\t${row.partDesc}\t${row.uom}\t${row.unitPrice}\t${row.qty}\t${row.lineType}`
+        const tsv = rows.map((row, i) =>
+          `${i + 1}\t${row.partNum}\t${row.partDesc}\t${row.uom}\t${row.unitPrice}\t${row.qty}\t${row.lineType}`
         ).join('\n');
 
-        navigator.clipboard.writeText(rows);
-        setCopied(true);
+        navigator.clipboard.writeText(tsv);
+        setCopiedKey(key);
       };
 
       const clearAll = () => {
@@ -346,7 +397,7 @@ Return ONLY the JSON array, no other text. Example format:
         setData(null);
         setError(null);
         setLastApiResponse(null);
-        setCopied(false);
+        setCopiedKey(null);
       };
 
       const exportErrorLog = async () => {
@@ -368,6 +419,46 @@ ${JSON.stringify(lastApiResponse, null, 2)}
         const filename = `error-log-${timestamp.replace(/[:.]/g, '-')}.txt`;
         await window.saveFileWithTauri(filename, logContent);
       };
+
+      // ── Multi-order handling ──────────────────────────────────────────────
+      // Most quotes are a single order and every row comes back with group=null,
+      // in which case everything below collapses to the original single-table UI.
+
+      // Distinct group names, in the order they first appear in the document.
+      const groups = useMemo(() => {
+        if (!data) return [];
+        const seen = [];
+        data.forEach(row => {
+          if (row.group && !seen.includes(row.group)) seen.push(row.group);
+        });
+        return seen;
+      }, [data]);
+
+      const isSplit = groups.length > 1;
+
+      // One card per order when split, otherwise a single card with everything.
+      const blocks = useMemo(() => {
+        if (!data) return [];
+        if (!isSplit) return [{ key: '__all__', label: 'Extracted Data', rows: data }];
+        return groups.map(g => ({
+          key: g,
+          label: `Order ${g}`,
+          rows: data.filter(row => row.group === g)
+        }));
+      }, [data, groups, isSplit]);
+
+      // Parts that show up in more than one order. Legitimate in the source quote,
+      // but they double-count if someone copies every row into one requisition.
+      const crossGroupDupes = useMemo(() => {
+        if (!isSplit) return [];
+        const groupsByPart = {};
+        data.forEach(row => {
+          if (!row.partNum || !row.group) return;
+          const set = groupsByPart[row.partNum] || (groupsByPart[row.partNum] = new Set());
+          set.add(row.group);
+        });
+        return Object.keys(groupsByPart).filter(p => groupsByPart[p].size > 1);
+      }, [data, isSplit]);
 
       return (
         <div
@@ -528,68 +619,96 @@ ${JSON.stringify(lastApiResponse, null, 2)}
                 )}
 
                 {data && (
-                  <div className="bg-slate-800 rounded-xl shadow-lg border border-slate-700 overflow-hidden">
-                    <div className="flex justify-between items-center p-4 border-b border-slate-700">
-                      <span className="font-medium text-slate-200">Extracted Data ({data.length} rows)</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={copyToClipboard}
-                          className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors shadow-lg shadow-accent/20"
-                        >
-                          {copied ? (
-                            <>
-                              <lucide-icon name="check" className="w-4 h-4"></lucide-icon>
-                              Copied! (Step 3 Complete)
-                            </>
-                          ) : (
-                            <>
-                              <lucide-icon name="copy" className="w-4 h-4"></lucide-icon>
-                              Step 3: Copy Data
-                            </>
-                          )}
-                        </button>
-                        <button
-                          onClick={clearAll}
-                          className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
-                        >
-                          <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
-                          Start Over
-                        </button>
-                      </div>
-                    </div>
-                    {copied && (
-                      <div className="bg-emerald-900/30 border-b border-emerald-900/50 p-3 text-center text-emerald-200 text-sm">
-                        Now: Open Purchase Req → Click first Ln # field → Home → Paste dropdown → Paste Append
+                  <div className="space-y-4">
+                    {isSplit && (
+                      <div className="bg-amber-900/20 border border-amber-700/50 rounded-xl p-4">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="text-sm">
+                            <span className="font-medium text-amber-200">
+                              This quote covers {groups.length} separate orders: {groups.join(', ')}
+                            </span>
+                            <p className="text-slate-400 mt-1">
+                              Copy each one separately below. Each copies renumbered from Ln 1, so it
+                              pastes into its own requisition.
+                            </p>
+                            {crossGroupDupes.length > 0 && (
+                              <p className="text-amber-300/90 mt-2">
+                                Note: {crossGroupDupes.join(', ')} appears in more than one order. That
+                                matches the quote, but &quot;Copy All Rows&quot; below would bring it in twice.
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              onClick={() => copyRows(data, '__all__')}
+                              className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors whitespace-nowrap"
+                            >
+                              {copiedKey === '__all__' ? (
+                                <>
+                                  <lucide-icon name="check" className="w-4 h-4"></lucide-icon>
+                                  Copied all
+                                </>
+                              ) : (
+                                <>
+                                  <lucide-icon name="copy" className="w-4 h-4"></lucide-icon>
+                                  Copy All Rows
+                                </>
+                              )}
+                            </button>
+                            <button
+                              onClick={clearAll}
+                              className="flex items-center gap-2 px-3 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors whitespace-nowrap"
+                            >
+                              <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
+                              Start Over
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-slate-700">
-                          <tr>
-                            <th className="px-3 py-2 text-left text-slate-300">Ln #</th>
-                            <th className="px-3 py-2 text-left text-slate-300">Part #</th>
-                            <th className="px-3 py-2 text-left text-slate-300">Part Desc</th>
-                            <th className="px-3 py-2 text-left text-slate-300">UOM</th>
-                            <th className="px-3 py-2 text-right text-slate-300">Unit Price</th>
-                            <th className="px-3 py-2 text-right text-slate-300">Qty</th>
-                            <th className="px-3 py-2 text-left text-slate-300">Line Type</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {data.map((row, i) => (
-                            <tr key={i} className="border-t border-slate-700 hover:bg-slate-700/50 transition-colors">
-                              <td className="px-3 py-2 text-slate-300">{row.ln}</td>
-                              <td className="px-3 py-2 font-mono text-xs text-primary">{row.partNum}</td>
-                              <td className="px-3 py-2 text-slate-300">{row.partDesc}</td>
-                              <td className="px-3 py-2 text-slate-300">{row.uom}</td>
-                              <td className="px-3 py-2 text-right text-accent">${row.unitPrice}</td>
-                              <td className="px-3 py-2 text-right text-slate-300">{row.qty}</td>
-                              <td className="px-3 py-2 text-slate-400">{row.lineType}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+
+                    {blocks.map(block => (
+                      <div key={block.key} className="bg-slate-800 rounded-xl shadow-lg border border-slate-700 overflow-hidden">
+                        <div className="flex justify-between items-center p-4 border-b border-slate-700">
+                          <span className="font-medium text-slate-200">
+                            {block.label} ({block.rows.length} rows)
+                          </span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => copyRows(block.rows, block.key)}
+                              className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors shadow-lg shadow-accent/20"
+                            >
+                              {copiedKey === block.key ? (
+                                <>
+                                  <lucide-icon name="check" className="w-4 h-4"></lucide-icon>
+                                  {isSplit ? 'Copied!' : 'Copied! (Step 3 Complete)'}
+                                </>
+                              ) : (
+                                <>
+                                  <lucide-icon name="copy" className="w-4 h-4"></lucide-icon>
+                                  {isSplit ? `Copy ${block.label}` : 'Step 3: Copy Data'}
+                                </>
+                              )}
+                            </button>
+                            {!isSplit && (
+                              <button
+                                onClick={clearAll}
+                                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-500 transition-colors"
+                              >
+                                <lucide-icon name="rotate-ccw" className="w-4 h-4"></lucide-icon>
+                                Start Over
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        {copiedKey === block.key && (
+                          <div className="bg-emerald-900/30 border-b border-emerald-900/50 p-3 text-center text-emerald-200 text-sm">
+                            Now: Open Purchase Req → Click first Ln # field → Home → Paste dropdown → Paste Append
+                          </div>
+                        )}
+                        <DataTable rows={block.rows} />
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

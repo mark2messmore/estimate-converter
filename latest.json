@@ -1,11 +1,11 @@
 {
-  "version": "1.1.8",
-  "notes": "Maintenance release. Backend reliability improvements to the extraction service (already active server-side) and auto-update verification.",
-  "pub_date": "2026-06-26T15:33:53Z",
+  "version": "1.1.9",
+  "notes": "Multi-order quotes are now split into a separate table per order, each with its own Copy button and line numbers starting at 1. Parts appearing in more than one order are flagged so they aren't double-counted.",
+  "pub_date": "2026-07-28T13:30:04Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzFFU3NsRjZCQlhzMEs0N1Vld1U5UlF4VFFWRUtveWR6Qisxdy95K1ZKN2FZc0lSSGNMTGwrZU83L3hLa0JqODllRHlLWUdxUW1XeDRuSFkrOHpsRHdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgyNDg4MDMzCWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS44X3g2NC1zZXR1cC5leGUKbWxLWDFUZ2VESnZNYTg1ZVlCYjNTa0srV1ZNQWRscHVxQXVvaEVPWGlpaVphalU5NXU4Z0tkWFlWa3Evam5acGs5RW9oZHhWWGtDNXRLaVZDdm1WQWc9PQo=",
-      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.8/Purchase.Requisition.Helper_1.1.8_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSUJramU5OXQ5UzhkRG02MldOTmFLTGcySE9pZGp4VXplQ0VVeENQdnFxa0VpLzNEUkhad1dBVVFtaStxVERJd1F1cUNpMzNYeDdVRnlFaEo5RHZxd05jN2hTbWlVcGdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1MjQ1Mzk4CWZpbGU6UHVyY2hhc2UgUmVxdWlzaXRpb24gSGVscGVyXzEuMS45X3g2NC1zZXR1cC5leGUKbFFkeFhzNW96WFRsV0x3ektMbEt3UGlOc2FuM08wZEYvc0FEWlFnN0JMUkpSb1hVYjBoeFQ1TjlQMXVyc2hZL2hnMG1ZZ3J3dXBpLzhBOEJFUzhHQ3c9PQo=",
+      "url": "https://github.com/mark2messmore/estimate-converter/releases/download/v1.1.9/Purchase.Requisition.Helper_1.1.9_x64-setup.exe"
     }
   }
 }
